@@ -10,7 +10,9 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 
 # ✅ Load Environment Variables
-load_dotenv()
+env_path = "/home/ubuntu/chatbot/.env"  # Absolute path to .env file
+load_dotenv(env_path)
+
 api_key = os.getenv("OPENAI_API_KEY")
 google_api_key = os.getenv("GOOGLE_API_KEY")
 cx_code = os.getenv("GOOGLE_CX_CODE")
@@ -34,7 +36,7 @@ def fetch_google_results(query):
     return results
 
 # ✅ Function to Update FAISS Index with Google Search Data
-def update_faiss_with_google(query, faiss_index_path="faiss_index"):
+def update_faiss_with_google(query, faiss_index_path="/home/ubuntu/chatbot/faiss_index"):
     """Fetch Google results and store them in FAISS."""
     
     # Load existing FAISS index (or create a new one)
@@ -56,7 +58,7 @@ def update_faiss_with_google(query, faiss_index_path="faiss_index"):
     print(f"🔹 Google search data added to FAISS for query: {query}")
 
 # ✅ Function to Retrieve Relevant Documents from FAISS
-def retrieve_from_faiss(query, faiss_index_path="faiss_index"):
+def retrieve_from_faiss(query, faiss_index_path="/home/ubuntu/chatbot/faiss_index"):
     """Retrieve relevant documents from FAISS."""
     
     embeddings = OpenAIEmbeddings(openai_api_key=api_key)
