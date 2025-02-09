@@ -18,7 +18,7 @@ load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
 # Load your data
-loader = TextLoader("my_data.txt")  # Ensure this file exists
+loader = TextLoader("/home/ubuntu/chatbot/my_data.txt")  # Ensure this file exists
 documents = loader.load()
 
 # Split text into smaller chunks
