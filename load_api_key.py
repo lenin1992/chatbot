@@ -1,17 +1,10 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env file
-load_dotenv()
-
-# Get the API key
+load_dotenv()  # Load from .env
 api_key = os.getenv("OPENAI_API_KEY")
 
-# Print API key (so subprocess in retrieval_qa.py can read it)
-if api_key:
-    print(api_key)  # ✅ This is required for retrieval_qa.py
-else:
-    print("Error: OPENAI_API_KEY is missing.")
+if not api_key:
+    raise ValueError("API key not found. Check your .env file.")
+
+print(f"Loaded API Key: {api_key[:5]}...")  # Partial print for verification
