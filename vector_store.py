@@ -16,7 +16,10 @@ from langchain.vectorstores import FAISS
 # Load environment variables
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY is not set. Please check your environment variables.")
 
+vectorstore = FAISS.from_documents(docs, OpenAIEmbeddings(openai_api_key=api_key))
 # Load your data
 loader = TextLoader("/home/ubuntu/chatbot/my_data.txt")  # Ensure this file exists
 documents = loader.load()
