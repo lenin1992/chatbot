@@ -12,7 +12,8 @@ from langchain_openai import OpenAIEmbeddings  # ✅ Use the correct import
 from langchain.schema import Document
 
 # Load environment variables
-load_dotenv()
+env_path = "/home/ubuntu/chatbot/.env"
+load_dotenv(env_path)
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 if not openai_api_key:
