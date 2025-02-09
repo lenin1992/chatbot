@@ -1,31 +1,28 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[18]:
-
-
-
-
-
-# In[23]:
-
-
 import os
 import requests
+from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 
-# ✅ Set API Credentials
-os.environ["OPENAI_API_KEY"] = "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"
-API_KEY = "AIzaSyDor0Ki9yEhlPucvQW5pXgn8AwXOv_pqxw"
-CX_CODE = "7182a7023f44f47cd"
+# ✅ Load Environment Variables
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+google_api_key = os.getenv("GOOGLE_API_KEY")
+cx_code = os.getenv("GOOGLE_CX_CODE")
+
+# Ensure API keys are set
+if not api_key or not google_api_key or not cx_code:
+    raise ValueError("❌ API keys are missing! Please check your .env file.")
 
 # ✅ Function to Fetch Google Search Results
 def fetch_google_results(query):
     """Fetch top 10 search results from Google Custom Search API."""
-    url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={API_KEY}&cx={CX_CODE}"
+    url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={google_api_key}&cx={cx_code}"
     response = requests.get(url)
     data = response.json()
     
@@ -41,7 +38,7 @@ def update_faiss_with_google(query, faiss_index_path="faiss_index"):
     """Fetch Google results and store them in FAISS."""
     
     # Load existing FAISS index (or create a new one)
-    embeddings = OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY"))
+    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     vectorstore = FAISS.load_local(faiss_index_path, embeddings, allow_dangerous_deserialization=True)
     
     # Fetch Google Search results
@@ -62,13 +59,12 @@ def update_faiss_with_google(query, faiss_index_path="faiss_index"):
 def retrieve_from_faiss(query, faiss_index_path="faiss_index"):
     """Retrieve relevant documents from FAISS."""
     
-    embeddings = OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY"))
+    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     vectorstore = FAISS.load_local(faiss_index_path, embeddings, allow_dangerous_deserialization=True)
     
     retriever = vectorstore.as_retriever()
     retrieved_docs = retriever.invoke(query)
 
-    
     # Print Retrieved Documents
     for i, doc in enumerate(retrieved_docs):
         print(f"\n🔹 Retrieved Document {i+1}:\n{doc.page_content[:500]}")
@@ -77,34 +73,3 @@ def retrieve_from_faiss(query, faiss_index_path="faiss_index"):
 query = "latest AI trends 2025"
 update_faiss_with_google(query)  # Update FAISS with new search results
 retrieve_from_faiss(query)       # Retrieve data from FAISS
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
