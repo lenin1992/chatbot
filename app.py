@@ -6,12 +6,12 @@ import streamlit as st
 from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 import requests
 
 # --- Load Environment Variables ---
-load_dotenv()
+load_dotenv("/home/ubuntu/chatbot/.env")  # Load .env from project directory
+
 api_key = os.getenv("OPENAI_API_KEY")
 google_api_key = os.getenv("GOOGLE_API_KEY")
 cx_code = os.getenv("GOOGLE_CX_CODE")
@@ -29,31 +29,33 @@ vectorstore = FAISS.load_local(faiss_index_path, embeddings, allow_dangerous_des
 def retrieve_faiss_results(query):
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})  # Get top 3 results
     retrieved_docs = retriever.invoke(query)
-
-    # 🔹 **Check Relevance**: Ignore FAISS results if they seem irrelevant
-    relevant_docs = [doc for doc in retrieved_docs if query.lower() in doc.page_content.lower()]
-    
-    return relevant_docs
+    return retrieved_docs
 
 # --- Function to Fetch Google Search Results ---
 def fetch_google_results(query):
     url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={google_api_key}&cx={cx_code}"
-    response = requests.get(url)
-    data = response.json()
     
-    results = []
-    for item in data.get("items", []):
-        text = f"{item['title']} - {item['snippet']} ({item['link']})"
-        results.append(Document(page_content=text))
-    
-    return results
+    try:
+        response = requests.get(url, timeout=5)  # Set timeout
+        response.raise_for_status()  # Raise an error for bad responses
+        data = response.json()
+        
+        results = []
+        for item in data.get("items", []):
+            text = f"{item['title']} - {item['snippet']} ({item['link']})"
+            results.append(Document(page_content=text))
+        
+        return results
+    except requests.exceptions.RequestException as e:
+        st.error(f"❌ Google Search API Error: {e}")
+        return []
 
 # --- Function to Handle Small Talk Queries ---
 def handle_small_talk(query):
     greetings = ["hi", "hello", "hey", "good morning", "good evening"]
     if query.lower() in greetings:
         return "👋 Hello! How can I assist you today?"
-    return None  # If it's not small talk, return None
+    return None
 
 # --- Streamlit UI ---
 st.set_page_config(page_title="AI Chatbot with Google Search & FAISS", layout="wide")
@@ -64,18 +66,21 @@ query = st.text_input("🔍 Ask something...", placeholder="e.g., What are the l
 
 if st.button("Search & Generate Answer"):
     if query:
-        # 🔹 **Check for Small Talk**
+        # 🔹 Check for Small Talk
         small_talk_response = handle_small_talk(query)
         if small_talk_response:
-            st.success(small_talk_response)  # ✅ Return friendly response
+            st.success(small_talk_response)
         else:
-            with st.status("⏳ **Fetching results... Please wait.**", expanded=True):
+            with st.spinner("⏳ Fetching results... Please wait."):
                 # --- Retrieve from FAISS ---
                 retrieved_docs = retrieve_faiss_results(query)
 
                 # --- Fetch Google Search Results & Update FAISS ---
                 google_docs = fetch_google_results(query)
-                vectorstore.add_documents(google_docs)
+                
+                # Only add relevant Google results
+                relevant_google_docs = [doc for doc in google_docs if len(doc.page_content) > 50]
+                vectorstore.add_documents(relevant_google_docs)
                 vectorstore.save_local(faiss_index_path)
 
                 # --- Display Retrieved Results ---
