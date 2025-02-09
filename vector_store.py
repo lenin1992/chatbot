@@ -1,27 +1,29 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
 # vector_store.py
 
 from dotenv import load_dotenv
 import os
-from langchain.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 
 # Load environment variables
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
+
+# Ensure API key is set
 if not api_key:
     raise ValueError("OPENAI_API_KEY is not set. Please check your environment variables.")
 
-vectorstore = FAISS.from_documents(docs, OpenAIEmbeddings(openai_api_key=api_key))
 # Load your data
-loader = TextLoader("/home/ubuntu/chatbot/my_data.txt")  # Ensure this file exists
+data_path = "/home/ubuntu/chatbot/my_data.txt"
+if not os.path.exists(data_path):
+    raise FileNotFoundError(f"File {data_path} not found. Please check the path.")
+
+loader = TextLoader(data_path)
 documents = loader.load()
 
 # Split text into smaller chunks
@@ -33,11 +35,4 @@ vectorstore = FAISS.from_documents(docs, OpenAIEmbeddings(openai_api_key=api_key
 
 # Save the FAISS index locally
 vectorstore.save_local("faiss_index")
-print("Vector database saved successfully!")
-
-
-# In[ ]:
-
-
-
-
+print("✅ Vector database saved successfully!")
