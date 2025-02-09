@@ -1,34 +1,31 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
-
-
-from dotenv import load_dotenv
 import os
-from langchain.vectorstores import FAISS
+from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
 
-# Load API Key
-load_dotenv()
+# --- Load Environment Variables ---
+env_path = "/home/ubuntu/chatbot/.env"  # ✅ Set absolute path
+load_dotenv(env_path)  
 api_key = os.getenv("OPENAI_API_KEY")
 
-# Load FAISS Vector Store
+# --- Ensure API Key is Loaded ---
+if not api_key:
+    raise ValueError("❌ OPENAI_API_KEY is missing! Please check your .env file.")
+
+# --- Load FAISS Vector Store ---
+faiss_index_path = "/home/ubuntu/chatbot/faiss_index"  # ✅ Use absolute path
 vectorstore = FAISS.load_local(
-    "faiss_index",
+    faiss_index_path,
     OpenAIEmbeddings(openai_api_key=api_key),
     allow_dangerous_deserialization=True  # ✅ Allow safe deserialization
 )
 
-
-# Set up retriever
+# --- Set Up Retriever ---
 retriever = vectorstore.as_retriever()
 
-
-# In[ ]:
-
-
-
-
+print("✅ FAISS Vector Store Loaded Successfully!")
