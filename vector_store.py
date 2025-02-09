@@ -20,7 +20,8 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
 # --- Load Environment Variables ---
-load_dotenv()  # This loads variables from .env in the current directory
+env_path = "/home/ubuntu/chatbot/.env"
+load_dotenv(env_path)  # This loads variables from .env in the current directory
 
 # Get the API key from the environment
 api_key = os.getenv("OPENAI_API_KEY")
