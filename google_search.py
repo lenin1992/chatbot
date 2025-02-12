@@ -9,14 +9,14 @@ from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 
-# ✅ Load Environment Variables
-env_path = "/home/ubuntu/chatbot/.env"  # Absolute path to .env file
+# --- Load Environment Variables ---
+env_path = "/home/ubuntu/chatbot/.env"  # ✅ Absolute path to .env file
 load_dotenv(env_path)
 
 # ✅ Retrieve API Keys from .env
 openai_api_key = os.getenv("OPENAI_API_KEY")
-google_api_key = os.getenv("API_KEY")  # ✅ Renamed to match .env
-cx_code = os.getenv("CX_CODE")  # ✅ Renamed to match .env
+google_api_key = os.getenv("GOOGLE_API_KEY")  # ✅ Renamed to match your .env
+cx_code = os.getenv("GOOGLE_CX_CODE")  # ✅ Renamed to match your .env
 
 # ✅ Ensure All API Keys are Loaded
 if not openai_api_key or not google_api_key or not cx_code:
@@ -27,6 +27,7 @@ def fetch_google_results(query):
     """Fetch top 10 search results from Google Custom Search API."""
     url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={google_api_key}&cx={cx_code}"
     response = requests.get(url)
+    response.raise_for_status()  # ✅ Check for request errors
     data = response.json()
     
     results = []
@@ -68,9 +69,14 @@ def retrieve_from_faiss(query, faiss_index_path="/home/ubuntu/chatbot/faiss_inde
     retriever = vectorstore.as_retriever()
     retrieved_docs = retriever.invoke(query)
 
+    # ✅ Check if documents were retrieved
+    if not retrieved_docs:
+        print("❌ No relevant documents found.")
+        return
+    
     # Print Retrieved Documents
     for i, doc in enumerate(retrieved_docs):
-        print(f"\n🔹 Retrieved Document {i+1}:\n{doc.page_content[:500]}")
+        print(f"\n🔹 Retrieved Document {i+1}:\n{doc.page_content[:500]}")  # ✅ Display first 500 chars
 
 # ✅ Example Usage:
 query = "latest AI trends 2025"
