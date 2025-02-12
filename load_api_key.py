@@ -1,7 +1,10 @@
 from dotenv import load_dotenv
 import os
-env_path = "home/ubuntu/chatbot/.env"
+
+# ✅ Corrected Absolute Path
+env_path = "/home/ubuntu/chatbot/.env"  # Added leading slash
 load_dotenv(env_path)  # Load from .env
+
 api_key = os.getenv("OPENAI_API_KEY")
 
 if not api_key:
