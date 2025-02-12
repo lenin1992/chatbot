@@ -19,7 +19,7 @@ CX_CODE = os.getenv("GOOGLE_CX_CODE")
 
 
 # --- Debugging: Check if API Keys Loaded ---
-if not api_key or not google_api_key or not cx_code:
+if not OPENAI_API_KEY or not API_KEY or not CX_CODE:
     st.error("❌ API keys are missing! Please check your .env file.")
     raise ValueError("❌ API keys are missing! Please check your .env file.")
 
