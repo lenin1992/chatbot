@@ -20,18 +20,18 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 
 # --- Load Environment Variables ---
-env_path = "/home/ubuntu/chatbot/.env"
-load_dotenv(env_path)  # This loads variables from .env in the current directory
+env_path = "/home/ubuntu/chatbot/.env"  # ✅ Absolute path to .env file
+load_dotenv(env_path)  
 
-# Get the API key from the environment
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY is not set. Please check your .env file.")
+# ✅ Get the API key from the environment
+openai_api_key = os.getenv("OPENAI_API_KEY")
+if not openai_api_key:
+    raise ValueError("❌ OPENAI_API_KEY is missing. Please check your .env file.")
 
 # --- Load Your Data ---
-data_path = "/home/ubuntu/chatbot/my_data.txt"
+data_path = "/home/ubuntu/chatbot/my_data.txt"  # ✅ Absolute path for data
 if not os.path.exists(data_path):
-    raise FileNotFoundError(f"File {data_path} not found. Please check the path.")
+    raise FileNotFoundError(f"❌ File {data_path} not found. Please check the path.")
 
 loader = TextLoader(data_path)
 documents = loader.load()
@@ -41,8 +41,9 @@ text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 docs = text_splitter.split_documents(documents)
 
 # --- Create FAISS Vector Store Using OpenAI Embeddings ---
-vectorstore = FAISS.from_documents(docs, OpenAIEmbeddings(openai_api_key=api_key))
+vectorstore = FAISS.from_documents(docs, OpenAIEmbeddings(openai_api_key=openai_api_key))  # ✅ Pass API key correctly
 
 # --- Save the FAISS Index Locally ---
-vectorstore.save_local("faiss_index")
+faiss_index_path = "/home/ubuntu/chatbot/faiss_index"  # ✅ Absolute path for consistency
+vectorstore.save_local(faiss_index_path)
 print("✅ Vector database saved successfully!")
