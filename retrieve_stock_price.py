@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
-
-
 import os
+from dotenv import load_dotenv  # ✅ Import load_dotenv
 from langchain.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
+
+# ✅ Load Environment Variables
+env_path = "/home/ubuntu/chatbot/.env"  # Absolute path to .env file
+load_dotenv(env_path)
 
 # Ensure OpenAI API key is set
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -42,10 +44,3 @@ retrieved_docs = retrieve_documents(query)
 # Display results
 for i, doc in enumerate(retrieved_docs, 1):
     print(f"\n🔹 Retrieved Document {i}:\n{doc.page_content[:500]}")  # Show first 500 chars
-
-
-# In[ ]:
-
-
-
-
