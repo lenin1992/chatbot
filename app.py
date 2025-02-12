@@ -13,9 +13,9 @@ import requests
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 load_dotenv(dotenv_path)  # Load .env dynamically
 
-api_key = os.getenv("OPENAI_API_KEY")
-google_api_key = os.getenv("GOOGLE_API_KEY")
-cx_code = os.getenv("GOOGLE_CX_CODE")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+API_KEY = os.getenv("GOOGLE_API_KEY")
+CX_CODE = os.getenv("GOOGLE_CX_CODE")
 # --- Debugging: Print Loaded API Keys ---
 st.write("OPENAI_API_KEY:", api_key)
 st.write("GOOGLE_API_KEY:", google_api_key)
