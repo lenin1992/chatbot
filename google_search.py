@@ -13,13 +13,14 @@ from langchain.schema import Document
 env_path = "/home/ubuntu/chatbot/.env"  # Absolute path to .env file
 load_dotenv(env_path)
 
-api_key = os.getenv("OPENAI_API_KEY")
-google_api_key = os.getenv("GOOGLE_API_KEY")
-cx_code = os.getenv("GOOGLE_CX_CODE")
+# ✅ Retrieve API Keys from .env
+openai_api_key = os.getenv("OPENAI_API_KEY")
+google_api_key = os.getenv("API_KEY")  # ✅ Renamed to match .env
+cx_code = os.getenv("CX_CODE")  # ✅ Renamed to match .env
 
-# Ensure API keys are set
-if not api_key or not google_api_key or not cx_code:
-    raise ValueError("❌ API keys are missing! Please check your .env file.")
+# ✅ Ensure All API Keys are Loaded
+if not openai_api_key or not google_api_key or not cx_code:
+    raise ValueError("❌ Required API keys are missing! Please check your .env file.")
 
 # ✅ Function to Fetch Google Search Results
 def fetch_google_results(query):
@@ -40,7 +41,7 @@ def update_faiss_with_google(query, faiss_index_path="/home/ubuntu/chatbot/faiss
     """Fetch Google results and store them in FAISS."""
     
     # Load existing FAISS index (or create a new one)
-    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     vectorstore = FAISS.load_local(faiss_index_path, embeddings, allow_dangerous_deserialization=True)
     
     # Fetch Google Search results
@@ -61,7 +62,7 @@ def update_faiss_with_google(query, faiss_index_path="/home/ubuntu/chatbot/faiss
 def retrieve_from_faiss(query, faiss_index_path="/home/ubuntu/chatbot/faiss_index"):
     """Retrieve relevant documents from FAISS."""
     
-    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     vectorstore = FAISS.load_local(faiss_index_path, embeddings, allow_dangerous_deserialization=True)
     
     retriever = vectorstore.as_retriever()
