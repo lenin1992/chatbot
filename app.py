@@ -22,6 +22,9 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.schema import Document
 
+# ✅ Set Page Config (Must be first Streamlit command)
+st.set_page_config(page_title="AI Chatbot with Google Search & FAISS", layout="wide")
+
 # ✅ Load Environment Variables
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 if not os.path.exists(dotenv_path):
@@ -90,7 +93,6 @@ def handle_small_talk(query):
     return "👋 Hello! How can I assist you today?" if query.lower() in greetings else None
 
 # ✅ Streamlit UI
-st.set_page_config(page_title="AI Chatbot with Google Search & FAISS", layout="wide")
 st.title("🤖 AI Chatbot with Google Search & FAISS")
 
 query = st.text_input("🔍 Ask something...", placeholder="e.g., What are the latest AI trends in 2025?")
