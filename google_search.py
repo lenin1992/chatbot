@@ -2,83 +2,35 @@
 # coding: utf-8
 
 import os
-import requests
-from dotenv import load_dotenv
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.schema import Document
+from dotenv import load_dotenv, dotenv_values
 
-# --- Load Environment Variables ---
-env_path = "/home/ubuntu/chatbot/.env"  # ✅ Absolute path to .env file
+# ✅ Absolute path to the .env file
+env_path = "/home/ubuntu/chatbot/.env"
+
+# ✅ Load existing environment variables
 load_dotenv(env_path)
 
-# ✅ Retrieve API Keys from .env
-openai_api_key = os.getenv("OPENAI_API_KEY")
-google_api_key = os.getenv("GOOGLE_API_KEY")  # ✅ Renamed to match your .env
-cx_code = os.getenv("GOOGLE_CX_CODE")  # ✅ Renamed to match your .env
+def update_env_variable(key, value):
+    """Update or add an environment variable in the .env file."""
+    env_vars = dotenv_values(env_path)  # Load existing .env values
+    env_vars[key] = value  # Update the key with the new value
 
-# ✅ Ensure All API Keys are Loaded
-if not openai_api_key or not google_api_key or not cx_code:
-    raise ValueError("❌ Required API keys are missing! Please check your .env file.")
+    # ✅ Write updated variables back to the .env file
+    with open(env_path, "w") as f:
+        for k, v in env_vars.items():
+            f.write(f"{k}={v}\n")
 
-# ✅ Function to Fetch Google Search Results
-def fetch_google_results(query):
-    """Fetch top 10 search results from Google Custom Search API."""
-    url = f"https://www.googleapis.com/customsearch/v1?q={query}&key={google_api_key}&cx={cx_code}"
-    response = requests.get(url)
-    response.raise_for_status()  # ✅ Check for request errors
-    data = response.json()
-    
-    results = []
-    for item in data.get("items", []):
-        text = f"{item['title']} - {item['snippet']} ({item['link']})"
-        results.append(Document(page_content=text))
-    
-    return results
+    print(f"✅ Updated {key} in .env file")
 
-# ✅ Function to Update FAISS Index with Google Search Data
-def update_faiss_with_google(query, faiss_index_path="/home/ubuntu/chatbot/faiss_index"):
-    """Fetch Google results and store them in FAISS."""
-    
-    # Load existing FAISS index (or create a new one)
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-    vectorstore = FAISS.load_local(faiss_index_path, embeddings, allow_dangerous_deserialization=True)
-    
-    # Fetch Google Search results
-    google_docs = fetch_google_results(query)
-    
-    # Split into chunks for embedding
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
-    chunks = text_splitter.split_documents(google_docs)
-    
-    # Add to FAISS
-    vectorstore.add_documents(chunks)
-    
-    # Save updated FAISS index
-    vectorstore.save_local(faiss_index_path)
-    print(f"🔹 Google search data added to FAISS for query: {query}")
+# ✅ Example: Updating API keys
+update_env_variable("OPENAI_API_KEY", "sk-new-openai-key")
+update_env_variable("GOOGLE_API_KEY", "new-google-api-key")
+update_env_variable("GOOGLE_CX_CODE", "new-google-cx-code")
 
-# ✅ Function to Retrieve Relevant Documents from FAISS
-def retrieve_from_faiss(query, faiss_index_path="/home/ubuntu/chatbot/faiss_index"):
-    """Retrieve relevant documents from FAISS."""
-    
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-    vectorstore = FAISS.load_local(faiss_index_path, embeddings, allow_dangerous_deserialization=True)
-    
-    retriever = vectorstore.as_retriever()
-    retrieved_docs = retriever.invoke(query)
+# ✅ Reload environment variables after update
+load_dotenv(env_path)
 
-    # ✅ Check if documents were retrieved
-    if not retrieved_docs:
-        print("❌ No relevant documents found.")
-        return
-    
-    # Print Retrieved Documents
-    for i, doc in enumerate(retrieved_docs):
-        print(f"\n🔹 Retrieved Document {i+1}:\n{doc.page_content[:500]}")  # ✅ Display first 500 chars
-
-# ✅ Example Usage:
-query = "latest AI trends 2025"
-update_faiss_with_google(query)  # Update FAISS with new search results
-retrieve_from_faiss(query)       # Retrieve data from FAISS
+# ✅ Verify the changes
+print(f"🔹 OPENAI_API_KEY: {os.getenv('OPENAI_API_KEY')[:5]}...")  # Masked for security
+print(f"🔹 GOOGLE_API_KEY: {os.getenv('GOOGLE_API_KEY')[:5]}...")
+print(f"🔹 GOOGLE_CX_CODE: {os.getenv('GOOGLE_CX_CODE')[:5]}...")
